@@ -108,9 +108,9 @@ export async function POST(request: Request) {
 
         console.log("Calling Gemini API with key:", process.env.GEMINI_API_KEY?.substring(0, 10) + "...");
 
-        // Use Gemini Flash for speed and free tier
+        // Use Gemini Pro for compatibility with free tier
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-pro",
             generationConfig: { responseMimeType: "application/json" }
         });
 
