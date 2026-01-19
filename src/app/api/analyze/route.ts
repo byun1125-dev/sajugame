@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     `;
 
         // Check availability of API Key
-        if (!process.env.GEMINI_API_KEY) {
+        if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'dummy-key') {
             console.log("No GEMINI_API_KEY found, returning mock response for:", slug);
             await new Promise(resolve => setTimeout(resolve, 1500));
             return NextResponse.json({
@@ -106,6 +106,8 @@ export async function POST(request: Request) {
             });
         }
 
+        console.log("Calling Gemini API with key:", process.env.GEMINI_API_KEY?.substring(0, 10) + "...");
+
         // Use Gemini Flash for speed and free tier
         const model = genAI.getGenerativeModel({
             model: "gemini-1.5-flash",
@@ -116,6 +118,8 @@ export async function POST(request: Request) {
         const response = await result.response;
         const text = response.text();
 
+        console.log("Gemini API response received, length:", text.length);
+
         const finalResult = JSON.parse(text);
 
         return NextResponse.json({
@@ -125,6 +129,13 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Error details:', JSON.stringify(error, null, 2));
+
+        // Return more descriptive error
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: error instanceof Error ? error.message : 'Unknown error',
+            details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        }, { status: 500 });
     }
 }
