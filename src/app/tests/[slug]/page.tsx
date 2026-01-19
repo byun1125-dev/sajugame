@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { TESTS } from '@/lib/config/tests-config';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import { Loader2, Download, Share2, RefreshCcw } from 'lucide-react';
 import html2canvas from 'html2canvas';
+import { getProfile } from '@/lib/utils/profile-storage';
 
 type AnalysisResult = {
     summary: string;
@@ -43,6 +44,14 @@ export default function TestPage() {
     });
 
     const resultRef = useRef<HTMLDivElement>(null);
+
+    // Auto-fill from saved profile on mount
+    useEffect(() => {
+        const savedProfile = getProfile();
+        if (savedProfile) {
+            setFormData(savedProfile);
+        }
+    }, []);
 
     const handleStart = () => setStep('input');
 
